@@ -10,7 +10,7 @@ app.use(express.json()); // To parse JSON bodies
 
 // Connect to Cassandra
 const client = new cassandra.Client({
-  contactPoints: ['127.0.0.1'], // Replace with your Cassandra contact points
+  contactPoints: ['172.17.0.2'], // Replace with your Cassandra contact points
   localDataCenter: 'datacenter1', // Replace with your Cassandra data center
   keyspace: 'blog_keyspace'
 });
