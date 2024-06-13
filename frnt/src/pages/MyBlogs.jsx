@@ -13,12 +13,11 @@ const MyBlog = () => {
 
   const callBlogs = async () => {
     try {
-      console.log("Fetching blogs...");
-      const result = await axios.post("http://localhost:8080/getUserBlogs", { auth });
-
+      // console.log("Fetching blogs...",auth);
+      const result = await axios.post("http://localhost:8080/getUserBlogs",{auth});
       if (result.status === 200) {
         setBlogs(result.data.data);
-        console.log(result.data.data); // Logs the fetched blogs
+        // console.log(result.data.data); // Logs the fetched blogs
       } else {
         console.error("Failed to fetch blogs", result.status);
       }
@@ -42,7 +41,7 @@ const MyBlog = () => {
   };
 
   const startEditing = (blog) => {
-    setIsEditing(blog._id);
+    setIsEditing(blog.id);
     setEditFormData({ title: blog.title, content: blog.content });
   };
 
@@ -58,14 +57,14 @@ const MyBlog = () => {
 
   const updateBlog = async (blogId) => {
     try {
+      // console.log("Updating blog with ID:", blogId);
       const result = await axios.put(`http://localhost:8080/updateBlog/${blogId}`, editFormData);
-
       if (result.status === 200) {
         const updatedBlogs = blogs.map(blog =>
-          blog._id === blogId ? { ...blog, ...editFormData } : blog
+          blog._id === blogId ? { ...blog, title: editFormData.title, content: editFormData.content } : blog
         );
         setBlogs(updatedBlogs);
-        setIsEditing(null);
+        setIsEditing(null); // Clear editing mode after successful update
       } else {
         console.error("Failed to update blog", result.status);
       }
@@ -73,7 +72,6 @@ const MyBlog = () => {
       console.error("Error updating blog", error);
     }
   };
-
   useEffect(() => {
     callBlogs();
   });
@@ -89,7 +87,7 @@ const MyBlog = () => {
         {blogs.map((blog, index) => (
           <div key={index} className='box-folder'>
             <div className="unique-blog-box">
-              {isEditing === blog._id ? (
+              {isEditing == blog.id ? (
                 <div>
                   <input
                     type="text"
@@ -104,7 +102,7 @@ const MyBlog = () => {
                     onChange={handleUpdateChange}
                     className="unique-edit-textarea"
                   />
-                  <button onClick={() => updateBlog(blog._id)} className="unique-blog-button unique-blog-edit">Save</button>
+                  <button onClick={() => updateBlog(blog.id)} className="unique-blog-button unique-blog-edit">Save</button>
                   <button onClick={cancelEditing} className="unique-blog-button">Cancel</button>
                 </div>
               ) : (
@@ -121,7 +119,7 @@ const MyBlog = () => {
                       ))}
                     </ul>
                   </div>
-                  <button onClick={() => deleteBlog(blog._id)} className="unique-blog-button unique-blog-delete">Delete</button>
+                  <button onClick={() => deleteBlog(blog.id)} className="unique-blog-button unique-blog-delete">Delete</button>
                   <button onClick={() => startEditing(blog)} className="unique-blog-button unique-blog-edit">Edit</button>
                 </div>
               )}

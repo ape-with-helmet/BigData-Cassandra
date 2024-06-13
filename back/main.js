@@ -46,10 +46,11 @@ app.post("/login", async (req, res) => {
       return res.status(400).send({ message: "Both email and password are required!" });
     }
 
-    const query = 'SELECT * FROM users WHERE email = ? AND pwd = ?';
-    const params = [email, pwd];
+    const query = 'SELECT * FROM users WHERE combined_credentials = ? ALLOW FILTERING';
+    const combinedCredentials = `${email}:${pwd}`;
+    const params = [combinedCredentials];
     const result = await client.execute(query, params, { prepare: true });
-
+    
     if (result.rowLength > 0) {
       return res.send({ message: "Login successful", status: 200 });
     } else {
@@ -81,8 +82,7 @@ app.get("/getBlogs", async (req, res) => {
 // Endpoint to get blogs by a specific user
 app.post("/getUserBlogs", async (req, res) => {
   try {
-    const { author } = req.body;
-
+    const author = req.body.auth;
     const query = 'SELECT * FROM blog WHERE author = ? ALLOW FILTERING';
     const params = [author];
     const result = await client.execute(query, params, { prepare: true });
@@ -103,12 +103,13 @@ app.put('/updateBlog/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content } = req.body;
-
+      
+    // console.log(id,title,content)
     const query = 'UPDATE blog SET title = ?, content = ?, updated_at = toTimestamp(now()) WHERE id = ?';
     const params = [title, content, id];
 
     await client.execute(query, params, { prepare: true });
-    res.status(200).json({ message: 'Blog updated successfully' });
+    res.status(200).send({ message: 'Blog updated successfully' });
   } catch (error) {
     console.error('Error updating blog:', error);
     res.status(500).json({ message: 'Internal server error' });
